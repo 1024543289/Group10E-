@@ -1,0 +1,205 @@
+<style>
+    .btns {
+        margin-left: 25%;
+        margin-top: 50px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: .3em 1.2em;
+        border-radius: 3px;
+        background-color: teal;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .btn:nth-child(3) {
+        background-color: red;
+    }
+
+    table.table {
+        box-sizing: border-box;
+        width: 50%;
+        border-collapse: collapse;
+        margin: 0 auto;
+
+    }
+
+    table.table td,
+    table.table th {
+        border: 1px solid #ccc;
+        line-height: 2em;
+        text-align: center;
+    }
+
+    table.table tr.current {
+        background: #eeddee;
+    }
+
+    table.table1 {
+        box-sizing: border-box;
+        width: 50%;
+        border-collapse: collapse;
+        margin: 50px auto 0;
+    }
+
+    table.table1 td {
+        border: 1px solid #cccccc;
+        line-height: 3.5em;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .none {
+        display: none;
+    }
+
+    .heng {
+        width: 50%;
+        height: 4px;
+        border-bottom: 1px solid gray;
+        margin: 30px auto;
+    }
+    .ls > input {
+        width: 80%;
+        height: 2em;
+    }
+
+</style>
+<div class="btns">
+    <div class="btn" id="btn_add">添加</div>
+    <div class="btn">批量导入</div>
+    <div class="btn">批量删除</div>
+</div>
+
+<div class="forms">
+    <form action="javascript:void(0)">
+        <table class="table1">
+            <tbody>
+            <tr>
+                <td>商品编号</td>
+                <td><input type="text" name="customerId"></td>
+            </tr>
+            <tr>
+                <td>下单时间</td>
+                <td><input type="text" name="xd"></td>
+            </tr>
+            <tr>
+                <td> 购买数量</td>
+                <td><input type="text" name="gm"></td>
+            </tr>
+            <tr>
+                <td> 客户id</td>
+                <td><input type="text" name="kh"></td>
+            </tr>
+            <tr>
+                <td> 客服id</td>
+                <td><input type="text" name="kf"></td>
+            </tr>
+            <tr>
+                <td> 配送地址</td>
+                <td><input type="text" name="ps"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="submit" value="提交"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+    <div class="heng"></div>
+</div>
+<table class="table">
+    <thead>
+    <tr>
+        <th width="100px">商品编号</th>
+        <th width="100px">下单时间</th>
+        <th width="80px">购买数量</th>
+        <th width="150px">顾客id</th>
+        <th width="100px">服务人员id</th>
+        <th width="100px">配送地址</th>
+        <th width="100px">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="none">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><a class="btn_del" href="javascript:void(0)">删除</a>
+            <a class="btn_upd" href="javascript:void(0)">修改</a></td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    //开始添加
+    // var btn_add = document.getElementById("btn_add");
+    //获取tr
+    var tbody = document.getElementsByTagName("tbody")[0];
+    var basicurl = "http://134.175.154.93:6677";
+    document.forms[0].onsubmit = function (event) {
+        //1. 校验有效性
+        //2.获取有效值
+        var customerId = document.querySelector("input[name=customerId]").value;
+        console.log("customerId",customerId);
+        var telephone = document.querySelector("input[name=telephone]").value;
+        var id = document.querySelector("input[name=id]").value;
+        var url=basicurl + " /order/insertOrder";
+        var data;
+        if (id) {
+            data = "customerId=" + id + "&realname=" + realname + "&telephone=" + telephone
+        } else {
+            data = "realname=" + realname + "&telephone=" + telephone
+        }
+
+        $.post(url,data,function (result) {
+            initData();
+            alert(result.message);
+            console.log(data)
+        });
+        event.preventDefault();
+    };
+    //添加结束
+
+    var basicurl = "http://134.175.154.93:6677";
+    var btn_add = document.getElementById("btn_add");
+    btn_add.onclick=function () {
+
+    };
+    //获取tr
+    var tbody = document.getElementsByTagName("tbody")[1];
+    initData();
+    //初始化数据
+    function initData() {
+        var url = basicurl + "/order/findAllOrder";
+        $.get(url,function (response) {
+            Array.prototype.slice.call(tbody.children, 0).forEach(function (item, index) {
+                if (index !== 0) {//第一tr隐藏了,删除不了，因此要判断一下
+                    tbody.removeChild(item);
+                }
+            });
+            response.data.forEach(function (item) {
+                //创建新的一行
+                var newTr = tbody.firstElementChild.cloneNode(true);
+                newTr.children[0].innerText = item.id;
+                console.log(item.id);
+                //innerText获取或者设置一个元素的文本内容
+                //innerHTML获取或者设置一个元素的html内容
+                // newTr.children[1].innerHTML ="<strong>"+Math.random()+"</strong>";
+                var time = new Date( item.orderTime ) ;
+                Time = time.toLocaleString();
+                newTr.children[1].innerText = Time;
+                newTr.children[2].innerText = item.total;
+                newTr.children[3].innerText = item.customerId;
+                newTr.children[4].innerText = item.waiterId;
+                newTr.children[5].innerText = item.addressId;
+                //此时newTr的类名为none,默认隐藏，因此修改其类名为“空”
+                newTr.className = "";
+                //追加新tr
+                tbody.appendChild(newTr);
+            })
+        });
+    }
+</script>
